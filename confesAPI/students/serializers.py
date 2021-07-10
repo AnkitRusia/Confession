@@ -8,8 +8,9 @@ class StudentSerializer(serializers.ModelSerializer):
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ('postId', 'description', 'date', 'StudentId', 'image')
+        fields = ('postId', 'description', 'date', 'StudentId', 'image', "likes", "title")
     
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
+        fields = ('description', 'commentId', 'postId')

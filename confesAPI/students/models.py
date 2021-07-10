@@ -11,11 +11,12 @@ class Student(models.Model):
 
 class Post(models.Model):
     postId = models.AutoField(primary_key=True)
-    description = models.TextField(blank=True)
+    description = models.TextField(default="Post description")
     date = models.DateTimeField(auto_now_add=True, blank=True)
     StudentId = models.IntegerField(null=True)
     image = models.CharField(max_length=150, default="img")
-    #likes = models.IntegerField(default=0)
+    likes = models.IntegerField(default=0)
+    title = models.TextField(default="Title")
     
 
 class Comment(models.Model):

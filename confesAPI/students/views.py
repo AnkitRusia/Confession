@@ -9,7 +9,7 @@ import os
 from PIL import Image
 
 from students.models import Student, Post
-from students.serializers import StudentSerializer, PostSerializer
+from students.serializers import StudentSerializer, PostSerializer, CommentSerializer
 
 # Create your views here.
 
@@ -71,11 +71,11 @@ def postAPI(request, id=0):
         try:
             student = Student.objects.get(name=name)
             if password != student.password:
-                return JsonResponse("Wrong password", safe=False)
+                return JsonResponse(f"Wrong password {password} != {student.password}", safe=False)
         except Student.DoesNotExist:
             raise Http404("Student not found")
         post_data = JSONParser().parse(request) 
-        post = Post.objects.get(StudentId=post_data["PostID"])
+        post = Post.objects.get(postId=post_data["postId"])
         post_serializer = PostSerializer(post, data=post_data)
         if post_serializer.is_valid():
             post_serializer.save()
@@ -90,11 +90,12 @@ def postAPI(request, id=0):
 @csrf_exempt
 def SaveStudentImage(request, id=0):
     file = request.FILES["sImg"]
-    file_name = default_storage.save(file.name, file)
+    full_file_name = "Student//" + file.name
+    file_name = default_storage.save(full_file_name, file)
     student = Student.objects.get(StudentId=id)
     img_path = os.path.join(settings.BASE_DIR, "media", student.profilePicName)
     os.remove(img_path)
-    student.profilePicName = file_name
+    student.profilePicName = full_file_name
     img_path = os.path.join(settings.BASE_DIR, "media", student.profilePicName)
     img = Image.open(img_path)
     img = img.resize((250, 250))
@@ -131,6 +132,27 @@ def viewPostByName(request):
 @csrf_exempt
 def likePost(request, id=0):
     if request.method == 'GET':
-        post = Post.objects.get(PostId=id)
+        post = Post.objects.get(postId=id)
         post.likes += 1
         post.save(update_fields=["likes"])
+        return JsonResponse(f"Liked post with id = {id}", safe=False)
+    return JsonResponse(f"Failed to find post with id= {id}", safe=False)
+
+@csrf_exempt
+def addComment(request):
+    if request.method == 'POST':
+        name = request.GET.get("name", 'NoName')
+        password = request.GET.get("password")
+        try:
+            student = Student.objects.get(name=name)
+            if password != student.password:
+                return JsonResponse("Wrong password", safe=False)
+        except Student.DoesNotExist:
+            raise Http404("Student not found")
+
+        comment_data = JSONParser().parse(request) 
+        comment_serializer = CommentSerializer(data=comment_data)
+        if comment_serializer.is_valid():
+            comment_serializer.save()
+            return JsonResponse("Comment Added Successfully", safe=False)
+        return JsonResponse("Failed to add comment", safe=False)

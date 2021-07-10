@@ -13,5 +13,6 @@ urlpatterns = [
     url(r'^PostImage/([0-9]+)$', views.SavePostImage),
     url(r'^postByName/$', views.viewPostByName),
     url(r'^likePost/([0-9]+)$', views.likePost),
+    url(r'^addcomment/$', views.addComment),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
